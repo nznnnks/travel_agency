@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "description": "Travelio Frontend",
   "scripts": {
-    "start": "npx serve . -l $PORT"
+    "start": "node server.js"
   },
-  "dependencies": {
-    "serve": "^14.2.1"
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
 
