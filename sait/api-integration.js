@@ -5,10 +5,10 @@ class TravelioAPI {
     constructor() {
         // Базовые URL микросервисов
         this.baseURLs = {
-            userService: 'http://127.0.0.1:8084/api/users',  // Прямое подключение к user-service
-            tripService: 'http://127.0.0.1:8081/api/trips',
-            reviewService: 'http://127.0.0.1:8082/api/reviews',
-            matchService: 'http://127.0.0.1:8083/api/matches'
+            userService: 'https://responsible-education-production.up.railway.app/api/users',
+            tripService: 'https://terrific-purpose-production.up.railway.app/api/trips',
+            reviewService: 'https://gentle-benevolence-production.up.railway.app/api/reviews',
+            matchService: 'https://positive-nature-production.up.railway.app/api/matches'
         };
         
         // Токен аутентификации
