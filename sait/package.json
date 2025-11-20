@@ -1,0 +1,12 @@
+{
+  "name": "travelio-frontend",
+  "version": "1.0.0",
+  "description": "Travelio Frontend",
+  "scripts": {
+    "start": "npx serve . -p ${PORT:-3000}"
+  },
+  "dependencies": {
+    "serve": "^14.2.1"
+  }
+}
+
