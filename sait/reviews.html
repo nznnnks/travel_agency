@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Отзывы — Travelio</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+  <div class="container">
+    <div class="logo">Travelio</div>
+    <nav>
+      <a href="index.html">О нас</a>
+      <a href="routes.html">Маршруты</a>
+      <a href="reviews.html">Отзывы</a>
+      <a href="register.html" class="profile-link">Профиль</a>
+      <a href="companions.html">Попутчики</a>
+    </nav>
+  </div>
+</header>
+
+<section class="review-section">
+  <div class="review-container">
+    <h2 class="reviews-title">ОТЗЫВЫ НАШИХ ПУТЕШЕСТВЕННИКОВ</h2>
+
+    <div class="review-card-container">
+      <button class="review-arrow review-prev">&#10094;</button>
+      
+      <div class="review-card active">
+        <img src="images/review1.png" alt="Пользователь 1">
+        <div class="review-content">
+          <h4>Мария П.</h4>
+          <p>Отличный маршрут в горах! Красивые виды и безопасно.</p>
+          <div class="rating">⭐ 5/5</div>
+        </div>
+      </div>
+      
+      <button class="review-arrow review-next">&#10095;</button>
+    </div>
+
+    <button class="add-review-btn">Оставить отзыв</button>
+  </div>
+</section>
+
+<!-- Модальное окно для добавления отзыва -->
+<div id="addReviewModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Оставить отзыв</h3>
+      <span class="close" onclick="closeAddReviewModal()">&times;</span>
+    </div>
+    
+    <form id="addReviewForm" class="add-review-form">
+      <div class="form-group">
+        <label for="reviewText">Ваш отзыв:</label>
+        <textarea id="reviewText" name="reviewText" rows="4" placeholder="Поделитесь своими впечатлениями..." required></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label>Оценка:</label>
+        <div class="rating-input">
+          <input type="radio" id="star5" name="rating" value="5">
+          <label for="star5">⭐</label>
+          
+          <input type="radio" id="star4" name="rating" value="4">
+          <label for="star4">⭐</label>
+          
+          <input type="radio" id="star3" name="rating" value="3">
+          <label for="star3">⭐</label>
+          
+          <input type="radio" id="star2" name="rating" value="2">
+          <label for="star2">⭐</label>
+          
+          <input type="radio" id="star1" name="rating" value="1">
+          <label for="star1">⭐</label>
+        </div>
+      </div>
+      
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" onclick="closeAddReviewModal()">Отмена</button>
+        <button type="submit" class="btn-primary">Отправить отзыв</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<footer>
+  <p>&copy; 2025 Travelio</p>
+</footer>
+
+<script src="api-integration.js"></script>
+<script>
+// Данные отзывов (будут загружены из API)
+let reviews = [];
+
+let currentReview = 0;
+const reviewCard = document.querySelector('.review-card');
+const prevBtn = document.querySelector('.review-prev');
+const nextBtn = document.querySelector('.review-next');
+
+// Функция загрузки отзывов из API
+async function loadReviews() {
+  try {
+    const response = await fetch('http://localhost:8082/api/reviews');
+    if (response.ok) {
+      const apiReviews = await response.json();
+      console.log('Загружены отзывы из API:', apiReviews);
+      
+      // Преобразуем отзывы из API в формат для отображения
+      reviews = apiReviews.map(review => ({
+        name: "Пользователь", // Пока используем общее имя
+        content: review.content,
+        rating: review.rating,
+        image: "images/review1.png" // Аватарка пользователя
+      }));
+      
+      console.log('Преобразованные отзывы:', reviews);
+      
+      // Если есть отзывы, показываем первый
+      if (reviews.length > 0) {
+        showReview(0);
+      }
+    } else {
+      console.error('Ошибка загрузки отзывов:', response.status);
+      // Используем дефолтные отзывы при ошибке
+      loadDefaultReviews();
+    }
+  } catch (error) {
+    console.error('Ошибка при загрузке отзывов:', error);
+    // Используем дефолтные отзывы при ошибке
+    loadDefaultReviews();
+  }
+}
+
+
+function showReview(index) {
+  const review = reviews[index];
+  reviewCard.innerHTML = `
+    <img src="${review.image}" alt="${review.name}">
+    <div class="review-content">
+      <h4>${review.name}</h4>
+      <p>${review.content}</p>
+      <div class="rating">⭐ ${review.rating}/5</div>
+    </div>
+  `;
+}
+
+prevBtn.addEventListener('click', () => {
+  currentReview = (currentReview - 1 + reviews.length) % reviews.length;
+  showReview(currentReview);
+});
+
+nextBtn.addEventListener('click', () => {
+  currentReview = (currentReview + 1) % reviews.length;
+  showReview(currentReview);
+});
+
+document.querySelector('.add-review-btn').addEventListener('click', () => {
+  showAddReviewModal();
+});
+
+// Обработчик формы добавления отзыва
+document.getElementById('addReviewForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  handleAddReview();
+});
+
+// Функции для работы с модальным окном
+function showAddReviewModal() {
+  const modal = document.getElementById('addReviewModal');
+  if (modal) {
+    modal.style.display = 'block';
+  }
+}
+
+function closeAddReviewModal() {
+  document.getElementById('addReviewModal').style.display = 'none';
+  // Очищаем форму
+  document.getElementById('addReviewForm').reset();
+}
+
+// Функция для добавления отзыва
+async function handleAddReview() {
+  const formData = new FormData(document.getElementById('addReviewForm'));
+  const reviewText = formData.get('reviewText');
+  const rating = formData.get('rating');
+  
+  if (!reviewText || !rating) {
+    showErrorNotification('Пожалуйста, заполните все поля!');
+    return;
+  }
+  
+  try {
+    // Создаем новый отзыв
+    const newReview = {
+      content: reviewText,
+      rating: parseInt(rating),
+      userId: 1, // Временно используем ID 1, позже можно будет получать из сессии
+      reviewableId: 1, // ID маршрута или другого объекта для отзыва
+      reviewType: "TRIP" // Тип отзыва - для маршрутов
+    };
+    
+    console.log('Отправляем отзыв:', newReview);
+    
+    // Отправляем запрос к API
+    const response = await fetch('http://localhost:8082/api/reviews', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newReview)
+    });
+    
+    if (response.ok) {
+      const savedReview = await response.json();
+      console.log('Отзыв сохранен:', savedReview);
+      
+      // Перезагружаем отзывы из API
+      await loadReviews();
+      
+      // Закрываем модальное окно
+      closeAddReviewModal();
+      
+      // Показываем незаметное уведомление
+      showSuccessNotification('Отзыв успешно добавлен!');
+    } else {
+      throw new Error('Ошибка при сохранении отзыва');
+    }
+  } catch (error) {
+    console.error('Ошибка:', error);
+    showErrorNotification('Произошла ошибка при добавлении отзыва. Попробуйте еще раз.');
+  }
+}
+
+// Функции для показа уведомлений
+function showSuccessNotification(message) {
+  showNotification(message, 'success');
+}
+
+function showErrorNotification(message) {
+  showNotification(message, 'error');
+}
+
+function showNotification(message, type) {
+  // Создаем элемент уведомления
+  const notification = document.createElement('div');
+  notification.className = `notification notification-${type}`;
+  notification.textContent = message;
+  
+  // Добавляем стили
+  notification.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    z-index: 10000;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.3s ease;
+    max-width: 300px;
+    word-wrap: break-word;
+  `;
+  
+  // Устанавливаем цвет в зависимости от типа
+  if (type === 'success') {
+    notification.style.backgroundColor = '#10B981'; // Зеленый
+  } else {
+    notification.style.backgroundColor = '#EF4444'; // Красный
+  }
+  
+  // Добавляем в DOM
+  document.body.appendChild(notification);
+  
+  // Анимация появления
+  setTimeout(() => {
+    notification.style.opacity = '1';
+    notification.style.transform = 'translateX(0)';
+  }, 100);
+  
+  // Автоматическое скрытие через 3 секунды
+  setTimeout(() => {
+    notification.style.opacity = '0';
+    notification.style.transform = 'translateX(100%)';
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.parentNode.removeChild(notification);
+      }
+    }, 300);
+  }, 3000);
+}
+
+// Закрытие модального окна при клике вне его
+window.addEventListener('click', function(event) {
+  const modal = document.getElementById('addReviewModal');
+  if (event.target === modal) {
+    closeAddReviewModal();
+  }
+});
+
+// Загружаем отзывы при загрузке страницы
+loadReviews();
+
+// Убеждаемся, что модальное окно скрыто при загрузке
+document.addEventListener('DOMContentLoaded', function() {
+  const modal = document.getElementById('addReviewModal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+});
+</script>
+</body>
+</html>

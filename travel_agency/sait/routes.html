@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Маршруты — Travelio</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+<div class="container">
+<div class="logo">Travelio</div>
+<nav>
+<a href="index.html">О нас</a>
+<a href="routes.html">Маршруты</a>
+<a href="reviews.html">Отзывы</a>
+      <a href="register.html" class="profile-link">Профиль</a>
+</nav>
+</div>
+</header>
+
+<main class="layout">
+<aside class="sidebar">
+<h2>Фильтры</h2>
+<div class="filter-group">
+<h4>Тип маршрута</h4>
+<label class="radio"><input type="radio" class="filter-radio" name="type" value=""> Все</label>
+<label class="radio"><input type="radio" class="filter-radio" name="type" value="пеший"> Пеший</label>
+<label class="radio"><input type="radio" class="filter-radio" name="type" value="велосипед"> Велосипед</label>
+<label class="radio"><input type="radio" class="filter-radio" name="type" value="водный"> Водный</label>
+</div>
+<div class="filter-group">
+<h4>Сложность</h4>
+<label class="radio"><input type="radio" class="filter-radio" name="difficulty" value=""> Все</label>
+<label class="radio"><input type="radio" class="filter-radio" name="difficulty" value="лёгкая"> Лёгкая</label>
+<label class="radio"><input type="radio" class="filter-radio" name="difficulty" value="средняя"> Средняя</label>
+<label class="radio"><input type="radio" class="filter-radio" name="difficulty" value="сложная"> Сложная</label>
+</div>
+<div class="filter-group">
+<h4>Регион</h4>
+<label class="radio"><input type="radio" class="filter-radio" name="region" value=""> Все</label>
+<label class="radio"><input type="radio" class="filter-radio" name="region" value="горы"> Горы</label>
+<label class="radio"><input type="radio" class="filter-radio" name="region" value="лес"> Лес</label>
+<label class="radio"><input type="radio" class="filter-radio" name="region" value="побережье"> Побережье</label>
+</div>
+<div class="filter-group">
+<h4>Длительность (дни)</h4>
+<input class="days-input" id="daysMin" placeholder="Мин" autocomplete="off"> — <input class="days-input" id="daysMax" placeholder="Макс" autocomplete="off">
+</div>
+<div class="filter-group">
+<h4>Поиск по названию</h4>
+<input id="filterSearch" placeholder="Введите название..." autocomplete="off">
+</div>
+<button class="btn" onclick="document.querySelectorAll('.filter-radio').forEach(r=>r.checked=false);document.querySelectorAll('.days-input').forEach(i=>i.value='');document.querySelector('#filterSearch').value='';applyFilters();">Сбросить</button>
+<button class="btn" onclick="showCreateRouteModal()">Создать</button>
+</aside>
+
+<section class="main-content">
+<h2>Маршруты</h2>
+<div class="routes-counter">Найдено: 0 маршрутов</div>
+<div id="routesGrid" class="grid">
+<div class="card" data-title="Горный перевал" data-type="пеший" data-difficulty="средняя" data-region="горы" data-days="5">
+<h3>Горный перевал — 5 дней</h3>
+<div class="meta"><span>Пеший</span><span>Средняя</span></div>
+<div class="trip-actions">
+<button onclick="viewTripDetails(1)">Подробнее</button>
+<button onclick="findCompanions(1)">Найти попутчиков</button>
+</div>
+</div>
+<div class="card" data-title="Береговое приключение" data-type="водный" data-difficulty="лёгкая" data-region="побережье" data-days="3">
+<h3>Береговое приключение — 3 дня</h3>
+<div class="meta"><span>Водный</span><span>Лёгкая</span></div>
+<div class="trip-actions">
+<button onclick="viewTripDetails(2)">Подробнее</button>
+<button onclick="findCompanions(2)">Найти попутчиков</button>
+</div>
+</div>
+<div class="card" data-title="Лесной трек" data-type="пеший" data-difficulty="лёгкая" data-region="лес" data-days="2">
+<h3>Лесной трек — 2 дня</h3>
+<div class="meta"><span>Пеший</span><span>Лёгкая</span></div>
+<div class="trip-actions">
+<button onclick="viewTripDetails(3)">Подробнее</button>
+<button onclick="findCompanions(3)">Найти попутчиков</button>
+</div>
+</div>
+<div class="card" data-title="Сложный горный маршрут" data-type="пеший" data-difficulty="сложная" data-region="горы" data-days="7">
+<h3>Сложный горный маршрут — 7 дней</h3>
+<div class="meta"><span>Пеший</span><span>Сложная</span></div>
+<div class="trip-actions">
+<button onclick="viewTripDetails(4)">Подробнее</button>
+<button onclick="findCompanions(4)">Найти попутчиков</button>
+</div>
+</div>
+<div class="card" data-title="Велосипедный тур" data-type="велосипед" data-difficulty="средняя" data-region="лес" data-days="4">
+<h3>Велосипедный тур — 4 дня</h3>
+<div class="meta"><span>Велосипед</span><span>Средняя</span></div>
+<div class="trip-actions">
+<button onclick="viewTripDetails(5)">Подробнее</button>
+<button onclick="findCompanions(5)">Найти попутчиков</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+
+<!-- Модальное окно для создания маршрута -->
+<div id="createRouteModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Создать новый маршрут</h3>
+            <span class="close" onclick="closeCreateRouteModal()">&times;</span>
+        </div>
+        <form id="createRouteForm" class="create-route-form">
+            <div class="form-group">
+                <label for="destination">Название маршрута:</label>
+                <input type="text" id="destination" name="destination" required placeholder="Введите название маршрута" autocomplete="off">
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Описание:</label>
+                <textarea id="description" name="description" required placeholder="Опишите маршрут" autocomplete="off"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="tripType">Тип маршрута:</label>
+                <select id="tripType" name="tripType" required>
+                    <option value="">Выберите тип</option>
+                    <option value="пеший">Пеший</option>
+                    <option value="велосипед">Велосипед</option>
+                    <option value="водный">Водный</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="difficulty">Сложность:</label>
+                <select id="difficulty" name="difficulty" required>
+                    <option value="">Выберите сложность</option>
+                    <option value="лёгкая">Лёгкая</option>
+                    <option value="средняя">Средняя</option>
+                    <option value="сложная">Сложная</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="region">Регион:</label>
+                <select id="region" name="region" required>
+                    <option value="">Выберите регион</option>
+                    <option value="горы">Горы</option>
+                    <option value="лес">Лес</option>
+                    <option value="побережье">Побережье</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="duration">Длительность (дни):</label>
+                <input type="number" id="duration" name="duration" required min="1" max="30" placeholder="5" autocomplete="off">
+            </div>
+            
+            <div class="form-group">
+                <label for="price">Цена (руб.):</label>
+                <input type="number" id="price" name="price" required min="0" step="0.01" placeholder="5000" autocomplete="off">
+            </div>
+            
+            <div class="form-group">
+                <label for="startDate">Дата начала:</label>
+                <input type="date" id="startDate" name="startDate" required autocomplete="off">
+            </div>
+            
+            <div class="form-group">
+                <label for="endDate">Дата окончания:</label>
+                <input type="date" id="endDate" name="endDate" required autocomplete="off">
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Создать маршрут</button>
+                <button type="button" class="btn btn-secondary" onclick="closeCreateRouteModal()">Отмена</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Модальное окно для деталей маршрута -->
+<div id="tripDetailsModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Детали маршрута</h3>
+            <span class="close" onclick="closeTripDetailsModal()">&times;</span>
+        </div>
+        <div id="tripDetailsContent">
+            <!-- Содержимое будет загружено динамически -->
+        </div>
+    </div>
+</div>
+
+<footer>
+<p>&copy; 2025 Travelio</p>
+</footer>
+<script src="script..js"></script>
+<script src="api-integration.js"></script>
+<script>
+// Устанавливаем даты по умолчанию
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const nextWeek = new Date(today);
+    nextWeek.setDate(nextWeek.getDate() + 7);
+    
+    document.getElementById('startDate').value = tomorrow.toISOString().split('T')[0];
+    document.getElementById('endDate').value = nextWeek.toISOString().split('T')[0];
+});
+
+// Функции для работы с модальными окнами
+function showCreateRouteModal() {
+    document.getElementById('createRouteModal').style.display = 'block';
+}
+
+function closeCreateRouteModal() {
+    document.getElementById('createRouteModal').style.display = 'none';
+    document.getElementById('createRouteForm').reset();
+}
+
+function closeTripDetailsModal() {
+    document.getElementById('tripDetailsModal').style.display = 'none';
+}
+
+// Обработчик формы создания маршрута
+document.getElementById('createRouteForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const tripData = {
+        destination: formData.get('destination'),
+        description: formData.get('description'),
+        startDate: formData.get('startDate'),
+        endDate: formData.get('endDate'),
+        price: parseFloat(formData.get('price')) || 0,
+        userId: 1, // По умолчанию
+        tripType: formData.get('tripType'),
+        difficulty: formData.get('difficulty'),
+        region: formData.get('region'),
+        duration: parseInt(formData.get('duration'))
+    };
+    
+    try {
+        const newTrip = await window.travelioAPI.createTrip(tripData);
+        
+        // Показываем уведомление об успехе
+        showMessage('Маршрут успешно создан!', 'success');
+        
+        // Закрываем модальное окно
+        closeCreateRouteModal();
+        
+        // Перезагружаем список маршрутов
+        await loadTrips();
+        
+    } catch (error) {
+        showMessage('Ошибка создания маршрута: ' + error.message, 'error');
+    }
+});
+
+// Функция для показа деталей маршрута
+async function viewTripDetails(tripId) {
+    try {
+        // Получаем детали маршрута из API
+        const trip = await window.travelioAPI.getTripById(tripId);
+        
+        // Форматируем даты
+        const startDate = new Date(trip.startDate).toLocaleDateString('ru-RU');
+        const endDate = new Date(trip.endDate).toLocaleDateString('ru-RU');
+        
+        // Создаем HTML для деталей маршрута
+        document.getElementById('tripDetailsContent').innerHTML = `
+            <div class="trip-details">
+                <div class="trip-header">
+                    <h4>${trip.destination}</h4>
+                    <span class="trip-status">${trip.status}</span>
+                </div>
+                
+                <div class="trip-info">
+                    <div class="info-row">
+                        <span class="label">Описание:</span>
+                        <span class="value">${trip.description}</span>
+                    </div>
+                    
+                    <div class="info-row">
+                        <span class="label">Тип маршрута:</span>
+                        <span class="value">${trip.tripType}</span>
+                    </div>
+                    
+                    <div class="info-row">
+                        <span class="label">Сложность:</span>
+                        <span class="value">${trip.difficulty}</span>
+                    </div>
+                    
+                    <div class="info-row">
+                        <span class="label">Регион:</span>
+                        <span class="value">${trip.region}</span>
+                    </div>
+                    
+                    <div class="info-row">
+                        <span class="label">Длительность:</span>
+                        <span class="value">${trip.duration} дней</span>
+                    </div>
+                    
+                    <div class="info-row">
+                        <span class="label">Цена:</span>
+                        <span class="value">${trip.price.toLocaleString('ru-RU')} руб.</span>
+                    </div>
+                    
+                    <div class="info-row">
+                        <span class="label">Дата начала:</span>
+                        <span class="value">${startDate}</span>
+                    </div>
+                    
+                    <div class="info-row">
+                        <span class="label">Дата окончания:</span>
+                        <span class="value">${endDate}</span>
+                    </div>
+                    
+                    <div class="info-row">
+                        <span class="label">ID пользователя:</span>
+                        <span class="value">${trip.userId}</span>
+                    </div>
+                </div>
+                
+                <div class="trip-actions">
+                    <button class="btn btn-primary" onclick="findCompanions(${trip.id}); closeTripDetailsModal();">Найти попутчиков</button>
+                    <button class="btn btn-secondary" onclick="closeTripDetailsModal()">Закрыть</button>
+                </div>
+            </div>
+        `;
+        
+        // Показываем модальное окно
+        document.getElementById('tripDetailsModal').style.display = 'block';
+        
+    } catch (error) {
+        console.error('Ошибка загрузки деталей маршрута:', error);
+        showMessage('Ошибка загрузки деталей маршрута: ' + error.message, 'error');
+    }
+}
+
+// Функция для поиска попутчиков
+function findCompanions(tripId) {
+    // Перенаправляем на страницу поиска попутчиков
+    window.location.href = 'companions.html';
+}
+
+// Функция для показа сообщений
+function showMessage(message, type) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${type}`;
+    messageDiv.textContent = message;
+    messageDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        border-radius: 5px;
+        color: white;
+        font-weight: bold;
+        z-index: 10000;
+        ${type === 'success' ? 'background-color: #4CAF50;' : 'background-color: #f44336;'}
+    `;
+    
+    document.body.appendChild(messageDiv);
+    
+    setTimeout(() => {
+        messageDiv.remove();
+    }, 3000);
+}
+
+// Функция для загрузки маршрутов
+async function loadTrips() {
+    try {
+        const trips = await window.travelioAPI.getAllTrips();
+        displayTrips(trips);
+    } catch (error) {
+        console.error('Ошибка загрузки маршрутов:', error);
+        showMessage('Ошибка загрузки маршрутов: ' + error.message, 'error');
+    }
+}
+
+// Функция для отображения маршрутов
+function displayTrips(trips) {
+    const routesGrid = document.getElementById('routesGrid');
+    
+    if (trips.length === 0) {
+        routesGrid.innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">Маршруты не найдены. Создайте первый маршрут!</p>';
+        return;
+    }
+    
+    routesGrid.innerHTML = trips.map(trip => `
+        <div class="card" data-title="${trip.destination}" data-type="${trip.tripType}" data-difficulty="${trip.difficulty}" data-region="${trip.region}" data-days="${trip.duration}">
+            <h3>${trip.destination} — ${trip.duration} дней</h3>
+            <div class="meta"><span>${trip.tripType}</span><span>${trip.difficulty}</span></div>
+            <div class="trip-actions">
+                <button onclick="viewTripDetails(${trip.id})">Подробнее</button>
+                <button onclick="findCompanions(${trip.id})">Найти попутчиков</button>
+            </div>
+        </div>
+    `).join('');
+    
+    // Обновляем счетчик
+    document.querySelector('.routes-counter').textContent = `Найдено: ${trips.length} маршрутов`;
+    
+    // Применяем фильтры
+    if (typeof applyFilters === 'function') {
+        applyFilters();
+    }
+}
+
+// Загружаем маршруты при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    loadTrips();
+});
+</script>
+</body>
+</html>

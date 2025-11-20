@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест API маршрутов — Travelio</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+        .form-group {
+            margin: 15px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            background: #FF6B35;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #E55A2B;
+        }
+        .result {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+        }
+        .error {
+            background: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+        .success {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .card h3 {
+            margin: 0 0 10px 0;
+            color: #FF6B35;
+        }
+        .card p {
+            margin: 5px 0;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Тест API маршрутов</h1>
+    
+    <div class="test-section">
+        <h2>Тест получения маршрутов</h2>
+        <button onclick="testGetTrips()">Получить все маршруты</button>
+        <div id="getResult" class="result" style="display: none;"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Тест создания маршрута</h2>
+        
+        <form id="createForm">
+            <div class="form-group">
+                <label for="destination">Название маршрута:</label>
+                <input type="text" id="destination" name="destination" required placeholder="Тестовый маршрут">
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Описание:</label>
+                <textarea id="description" name="description" required placeholder="Описание маршрута"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="tripType">Тип маршрута:</label>
+                <select id="tripType" name="tripType" required>
+                    <option value="">Выберите тип</option>
+                    <option value="пеший">Пеший</option>
+                    <option value="велосипед">Велосипед</option>
+                    <option value="водный">Водный</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="difficulty">Сложность:</label>
+                <select id="difficulty" name="difficulty" required>
+                    <option value="">Выберите сложность</option>
+                    <option value="лёгкая">Лёгкая</option>
+                    <option value="средняя">Средняя</option>
+                    <option value="сложная">Сложная</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="region">Регион:</label>
+                <select id="region" name="region" required>
+                    <option value="">Выберите регион</option>
+                    <option value="горы">Горы</option>
+                    <option value="лес">Лес</option>
+                    <option value="побережье">Побережье</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="duration">Длительность (дни):</label>
+                <input type="number" id="duration" name="duration" required min="1" max="30" placeholder="5">
+            </div>
+            
+            <div class="form-group">
+                <label for="price">Цена (руб.):</label>
+                <input type="number" id="price" name="price" required min="0" step="0.01" placeholder="5000">
+            </div>
+            
+            <div class="form-group">
+                <label for="startDate">Дата начала:</label>
+                <input type="date" id="startDate" name="startDate" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="endDate">Дата окончания:</label>
+                <input type="date" id="endDate" name="endDate" required>
+            </div>
+            
+            <button type="submit">Создать маршрут</button>
+        </form>
+        
+        <div id="createResult" class="result" style="display: none;"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Список маршрутов</h2>
+        <div id="tripsList" class="grid"></div>
+    </div>
+    
+    <script src="api-integration.js"></script>
+    <script>
+        // Инициализация API
+        const api = new TravelioAPI();
+        
+        // Устанавливаем даты по умолчанию
+        document.getElementById('startDate').value = '2025-01-15';
+        document.getElementById('endDate').value = '2025-01-20';
+        
+        // Тест получения маршрутов
+        async function testGetTrips() {
+            const resultDiv = document.getElementById('getResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result';
+            resultDiv.textContent = 'Загружаем маршруты...';
+            
+            try {
+                const trips = await api.getAllTrips();
+                
+                resultDiv.className = 'result success';
+                resultDiv.textContent = `✅ Успешно получено ${trips.length} маршрутов!\n\nДанные:\n${JSON.stringify(trips, null, 2)}`;
+                
+                // Обновляем список маршрутов
+                updateTripsList(trips);
+                
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ Ошибка получения маршрутов:\n${error.message}`;
+            }
+        }
+        
+        // Обработчик формы создания маршрута
+        document.getElementById('createForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const tripData = {
+                destination: formData.get('destination'),
+                description: formData.get('description'),
+                startDate: formData.get('startDate'),
+                endDate: formData.get('endDate'),
+                price: parseFloat(formData.get('price')) || 0,
+                userId: 1, // По умолчанию
+                tripType: formData.get('tripType'),
+                difficulty: formData.get('difficulty'),
+                region: formData.get('region'),
+                duration: parseInt(formData.get('duration'))
+            };
+            
+            const resultDiv = document.getElementById('createResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result';
+            resultDiv.textContent = 'Создаем маршрут...';
+            
+            try {
+                const newTrip = await api.createTrip(tripData);
+                
+                resultDiv.className = 'result success';
+                resultDiv.textContent = `✅ Маршрут успешно создан!\n\nОтвет API:\n${JSON.stringify(newTrip, null, 2)}`;
+                
+                // Очищаем форму
+                e.target.reset();
+                document.getElementById('startDate').value = '2025-01-15';
+                document.getElementById('endDate').value = '2025-01-20';
+                
+                // Обновляем список маршрутов
+                await testGetTrips();
+                
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ Ошибка создания маршрута:\n${error.message}`;
+            }
+        });
+        
+        // Обновление списка маршрутов
+        function updateTripsList(trips) {
+            const tripsList = document.getElementById('tripsList');
+            tripsList.innerHTML = '';
+            
+            trips.forEach(trip => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <h3>${trip.destination}</h3>
+                    <p><strong>Тип:</strong> ${trip.tripType}</p>
+                    <p><strong>Сложность:</strong> ${trip.difficulty}</p>
+                    <p><strong>Регион:</strong> ${trip.region}</p>
+                    <p><strong>Длительность:</strong> ${trip.duration} дней</p>
+                    <p><strong>Цена:</strong> ${trip.price} руб.</p>
+                    <p><strong>Даты:</strong> ${trip.startDate} - ${trip.endDate}</p>
+                `;
+                tripsList.appendChild(card);
+            });
+        }
+        
+        // Загружаем маршруты при загрузке страницы
+        window.addEventListener('load', testGetTrips);
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+

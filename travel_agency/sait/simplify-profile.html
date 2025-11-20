@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Упрощение профиля — Travelio</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .update-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+        .removed {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .kept {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .code {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        h2 {
+            color: #FF6B35;
+        }
+        .test-steps {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .profile-structure {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .profile-structure h4 {
+            margin: 0 0 10px 0;
+            color: #856404;
+        }
+        .profile-structure ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .profile-structure li {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Упрощение профиля пользователя</h1>
+    
+    <div class="update-section">
+        <h2>❌ Что убрано:</h2>
+        
+        <div class="removed">
+            <strong>Убраны поля "Имя" и "Фамилия" из профиля!</strong><br><br>
+            <strong>Изменения:</strong><br>
+            • Убраны HTML элементы для отображения имени и фамилии<br>
+            • Убран код заполнения этих полей в JavaScript<br>
+            • Упрощена логика отображения имени в заголовке<br>
+            • Упрощена функция создания инициалов для аватара<br>
+            • Убрано логирование для отладки
+        </div>
+    </div>
+    
+    <div class="update-section">
+        <h2>✅ Что осталось:</h2>
+        
+        <div class="kept">
+            <strong>В профиле остались только основные данные!</strong><br><br>
+            <strong>Структура профиля:</strong><br>
+            • Аватар с инициалами (на основе username)<br>
+            • Имя пользователя в заголовке (username)<br>
+            • Статус и дата регистрации<br>
+            • Личная информация: username, email, телефон, роль<br>
+            • Кнопка "Выйти из аккаунта"
+        </div>
+    </div>
+    
+    <div class="update-section">
+        <h2>📋 Обновленная структура профиля:</h2>
+        
+        <div class="profile-structure">
+            <h4>✅ Теперь в профиле отображаются:</h4>
+            <ul>
+                <li><strong>Аватар с инициалами</strong> - первые 2 буквы username</li>
+                <li><strong>Имя пользователя</strong> - username в заголовке</li>
+                <li><strong>Статус</strong> - "Активный пользователь"</li>
+                <li><strong>Дата регистрации</strong> - дата создания аккаунта</li>
+                <li><strong>Личная информация:</strong>
+                    <ul>
+                        <li>Имя пользователя (username)</li>
+                        <li>Email адрес</li>
+                        <li>Телефон (phone)</li>
+                        <li>Роль (role)</li>
+                    </ul>
+                </li>
+                <li><strong>Кнопка "Выйти из аккаунта"</strong></li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="update-section">
+        <h2>🧪 Как протестировать:</h2>
+        
+        <div class="test-steps">
+            <strong>1. Откройте страницу регистрации:</strong><br>
+            <code>sait/register.html</code>
+        </div>
+        
+        <div class="test-steps">
+            <strong>2. Зарегистрируйтесь с данными:</strong><br>
+            • Имя пользователя: <code>testuser</code><br>
+            • Email: <code>test@example.com</code><br>
+            • Пароль: <code>123456</code><br>
+            • Имя: <code>Иван</code> (не будет отображаться)<br>
+            • Фамилия: <code>Петров</code> (не будет отображаться)<br>
+            • Телефон: <code>+7-123-456-7890</code>
+        </div>
+        
+        <div class="test-steps">
+            <strong>3. Войдите в аккаунт:</strong><br>
+            • Используйте те же данные для входа<br>
+            • После успешного входа должен показаться профиль
+        </div>
+        
+        <div class="test-steps">
+            <strong>4. Проверьте отображение данных в профиле:</strong><br>
+            • <strong>Аватар:</strong> должен показывать инициалы "TE" (первые 2 буквы username)<br>
+            • <strong>Имя:</strong> должно показывать "testuser"<br>
+            • <strong>Имя пользователя:</strong> "testuser"<br>
+            • <strong>Email:</strong> "test@example.com"<br>
+            • <strong>Телефон:</strong> "+7-123-456-7890"<br>
+            • <strong>Роль:</strong> "Пользователь"<br>
+            • <strong>НЕТ полей "Имя" и "Фамилия"</strong>
+        </div>
+        
+        <div class="test-steps">
+            <strong>5. Проверьте сохранение при переключении вкладок:</strong><br>
+            • Переключитесь на другие страницы<br>
+            • Вернитесь на страницу профиля<br>
+            • Все данные должны остаться на месте
+        </div>
+    </div>
+    
+    <div class="update-section">
+        <h2>📝 Технические изменения:</h2>
+        
+        <div class="code">
+            <strong>🔄 Изменения в HTML:</strong><br>
+            // Убраны элементы:<br>
+            &lt;div class="info-item"&gt;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&lt;label&gt;Имя:&lt;/label&gt;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&lt;span id="profile-firstname"&gt;-&lt;/span&gt;<br>
+            &lt;/div&gt;<br>
+            &lt;div class="info-item"&gt;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&lt;label&gt;Фамилия:&lt;/label&gt;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&lt;span id="profile-lastname"&gt;-&lt;/span&gt;<br>
+            &lt;/div&gt;
+        </div>
+        
+        <div class="code">
+            <strong>🔄 Изменения в JavaScript:</strong><br>
+            // Убраны строки:<br>
+            document.getElementById('profile-firstname').textContent = user.firstName || '-';<br>
+            document.getElementById('profile-lastname').textContent = user.lastName || '-';<br><br>
+            // Упрощена логика имени:<br>
+            document.getElementById('profile-name').textContent = user.username || 'Пользователь';<br><br>
+            // Упрощена функция инициалов:<br>
+            function getInitials(username) {<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;if (username && username.length >= 2) {<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return username.substring(0, 2).toUpperCase();<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;} else if (username && username.length === 1) {<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return username.toUpperCase();<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;} else {<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return 'П';<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+            }
+        </div>
+    </div>
+    
+    <div class="update-section">
+        <h2>🔗 Полезные ссылки:</h2>
+        <ul>
+            <li><a href="register.html">Страница регистрации/авторизации/профиля (УПРОЩЕНА)</a></li>
+            <li><a href="debug-profile-data.html">Предыдущая диагностика данных профиля</a></li>
+            <li><a href="fix-profile-data.html">Предыдущее исправление данных профиля</a></li>
+        </ul>
+    </div>
+</body>
+</html>

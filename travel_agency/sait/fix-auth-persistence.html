@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Исправление сохранения авторизации — Travelio</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .fix-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+        .problem {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .solution {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .code {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        h2 {
+            color: #FF6B35;
+        }
+        .test-steps {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .flow {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .flow-step {
+            text-align: center;
+            flex: 1;
+        }
+        .flow-arrow {
+            font-size: 24px;
+            color: #FF6B35;
+            margin: 0 10px;
+        }
+        .flow-step h3 {
+            margin: 0 0 10px 0;
+            color: #FF6B35;
+        }
+        .flow-step p {
+            margin: 0;
+            color: #6b7280;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Исправление сохранения авторизации</h1>
+    
+    <div class="fix-section">
+        <h2>❌ Проблема:</h2>
+        
+        <div class="problem">
+            <strong>Профиль сбрасывается при переключении вкладок!</strong><br><br>
+            <strong>Причина:</strong> Состояние авторизации не сохранялось между страницами. 
+            Функция <code>checkAuthStatus()</code> вызывалась только на <code>register.html</code>, 
+            но не на других страницах.
+        </div>
+        
+        <div class="code">
+            <strong>Старая логика:</strong><br>
+            • <code>register.html</code> → проверяет авторизацию<br>
+            • <code>index.html</code> → НЕ проверяет авторизацию<br>
+            • <code>routes.html</code> → НЕ проверяет авторизацию<br>
+            • <code>reviews.html</code> → НЕ проверяет авторизацию<br>
+            • <code>companions.html</code> → НЕ проверяет авторизацию
+        </div>
+    </div>
+    
+    <div class="fix-section">
+        <h2>✅ Решение:</h2>
+        
+        <div class="solution">
+            <strong>Добавлена глобальная инициализация навигации на всех страницах!</strong><br><br>
+            Теперь каждая страница автоматически проверяет статус авторизации при загрузке.
+        </div>
+        
+        <div class="code">
+            <strong>Новая логика в <code>api-integration.js</code>:</strong><br>
+            class TravelioAPI {<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;// Инициализация навигации на всех страницах<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;initializeNavigation() {<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Обновляем токен из localStorage<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;this.authToken = localStorage.getItem('authToken');<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Обновляем навигацию<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;this.updateNavigation();<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Если пользователь авторизован, показываем профиль<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (this.isAuthenticated() && window.location.pathname.includes('register.html')) {<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (typeof showProfile === 'function') {<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;showProfile();<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+            }
+        </div>
+        
+        <div class="code">
+            <strong>Автоматическая инициализация на всех страницах:</strong><br>
+            // Инициализация при загрузке страницы<br>
+            document.addEventListener('DOMContentLoaded', function() {<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;initializeNavigation();<br>
+            });
+        </div>
+    </div>
+    
+    <div class="fix-section">
+        <h2>🔄 Обновленная логика работы:</h2>
+        
+        <div class="flow">
+            <div class="flow-step">
+                <h3>1. Загрузка страницы</h3>
+                <p>Любая страница загружается</p>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">
+                <h3>2. DOMContentLoaded</h3>
+                <p>Срабатывает событие загрузки</p>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">
+                <h3>3. initializeNavigation()</h3>
+                <p>Проверяется статус авторизации</p>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">
+                <h3>4. Обновление навигации</h3>
+                <p>Ссылка "Профиль" обновляется</p>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">
+                <h3>5. Показ профиля</h3>
+                <p>Если на register.html - показ профиля</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="fix-section">
+        <h2>🧪 Как протестировать исправление:</h2>
+        
+        <div class="test-steps">
+            <strong>1. Откройте страницу регистрации:</strong><br>
+            <code>sait/register.html</code>
+        </div>
+        
+        <div class="test-steps">
+            <strong>2. Зарегистрируйтесь и войдите в аккаунт:</strong><br>
+            • Заполните форму регистрации<br>
+            • Войдите в аккаунт<br>
+            • Убедитесь, что показан профиль
+        </div>
+        
+        <div class="test-steps">
+            <strong>3. Переключитесь на другие вкладки:</strong><br>
+            • <code>index.html</code> → главная страница<br>
+            • <code>routes.html</code> → маршруты<br>
+            • <code>reviews.html</code> → отзывы<br>
+            • <code>companions.html</code> → попутчики
+        </div>
+        
+        <div class="test-steps">
+            <strong>4. Вернитесь на страницу профиля:</strong><br>
+            • Нажмите на ссылку "Профиль" в навигации<br>
+            • Профиль ДОЛЖЕН остаться открытым<br>
+            • Все данные пользователя должны быть на месте
+        </div>
+        
+        <div class="test-steps">
+            <strong>5. Проверьте выход из аккаунта:</strong><br>
+            • Нажмите "Выйти из аккаунта"<br>
+            • Переключитесь на другие вкладки<br>
+            • Вернитесь на страницу профиля<br>
+            • Должна показаться форма авторизации
+        </div>
+    </div>
+    
+    <div class="fix-section">
+        <h2>📝 Технические изменения:</h2>
+        
+        <div class="solution">
+            <strong>🔄 Изменения в <code>api-integration.js</code>:</strong><br><br>
+            
+            <strong>1. Добавлена функция <code>initializeNavigation()</code>:</strong><br>
+            • Обновляет токен из localStorage<br>
+            • Обновляет навигацию<br>
+            • Показывает профиль на register.html если пользователь авторизован<br><br>
+            
+            <strong>2. Обновлена функция <code>updateNavigation()</code>:</strong><br>
+            • Теперь все ссылки ведут на register.html<br>
+            • Логика переключения между формами внутри register.html<br><br>
+            
+            <strong>3. Автоматическая инициализация:</strong><br>
+            • <code>DOMContentLoaded</code> → <code>initializeNavigation()</code><br>
+            • Работает на всех страницах
+        </div>
+        
+        <div class="solution">
+            <strong>🔄 Изменения в <code>register.html</code>:</strong><br><br>
+            
+            <strong>1. Функция <code>checkAuthStatus()</code>:</strong><br>
+            • Теперь использует <code>window.travelioAPI.isAuthenticated()</code><br><br>
+            
+            <strong>2. Функция <code>loadUserProfile()</code>:</strong><br>
+            • Теперь использует <code>window.travelioAPI.getCurrentUser()</code><br><br>
+            
+            <strong>3. Функция <code>logout()</code>:</strong><br>
+            • Теперь использует <code>window.travelioAPI.updateNavigation()</code><br><br>
+            
+            <strong>4. Функция <code>handleLogin()</code>:</strong><br>
+            • Теперь использует <code>window.travelioAPI.updateNavigation()</code>
+        </div>
+    </div>
+    
+    <div class="fix-section">
+        <h2>🔗 Полезные ссылки:</h2>
+        <ul>
+            <li><a href="register.html">Страница регистрации/авторизации/профиля (ИСПРАВЛЕНА)</a></li>
+            <li><a href="index.html">Главная страница (теперь сохраняет авторизацию)</a></li>
+            <li><a href="routes.html">Маршруты (теперь сохраняет авторизацию)</a></li>
+            <li><a href="reviews.html">Отзывы (теперь сохраняет авторизацию)</a></li>
+            <li><a href="companions.html">Попутчики (теперь сохраняет авторизацию)</a></li>
+            <li><a href="fix-login-logic.html">Предыдущее исправление логики авторизации</a></li>
+        </ul>
+    </div>
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Очистка данных — Travelio</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .clear-form {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #FF6B35;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        button:hover {
+            background: #E55A2B;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            border-left: 4px solid #28a745;
+            background: #d4edda;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .info {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Очистка данных браузера</h1>
+    
+    <div class="info">
+        <strong>Проблема:</strong> В браузере сохранены старые данные пользователя "КОлян", которые вызывают ошибку при регистрации.
+    </div>
+    
+    <div class="clear-form">
+        <button onclick="clearLocalStorage()">Очистить localStorage</button>
+        <button onclick="clearSessionStorage()">Очистить sessionStorage</button>
+        <button onclick="clearAllData()">Очистить все данные</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function clearLocalStorage() {
+            try {
+                localStorage.clear();
+                showResult('✅ localStorage очищен успешно!', 'success');
+            } catch (error) {
+                showResult('❌ Ошибка при очистке localStorage: ' + error.message, 'error');
+            }
+        }
+        
+        function clearSessionStorage() {
+            try {
+                sessionStorage.clear();
+                showResult('✅ sessionStorage очищен успешно!', 'success');
+            } catch (error) {
+                showResult('❌ Ошибка при очистке sessionStorage: ' + error.message, 'error');
+            }
+        }
+        
+        function clearAllData() {
+            try {
+                localStorage.clear();
+                sessionStorage.clear();
+                showResult('✅ Все данные очищены успешно! Теперь можно регистрироваться без ошибок.', 'success');
+            } catch (error) {
+                showResult('❌ Ошибка при очистке данных: ' + error.message, 'error');
+            }
+        }
+        
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('result');
+            const className = type === 'success' ? 'result' : 'result error';
+            resultDiv.innerHTML = `<div class="${className}">${message}</div>`;
+        }
+        
+        // Показываем текущие данные при загрузке
+        window.addEventListener('load', function() {
+            const authToken = localStorage.getItem('authToken');
+            const currentUser = localStorage.getItem('currentUser');
+            
+            let info = '';
+            if (authToken) {
+                info += `Токен: ${authToken.substring(0, 20)}...<br>`;
+            }
+            if (currentUser) {
+                const user = JSON.parse(currentUser);
+                info += `Пользователь: ${user.username || user.email || 'неизвестно'}<br>`;
+            }
+            
+            if (info) {
+                showResult(`<strong>Текущие данные:</strong><br>${info}`, 'info');
+            } else {
+                showResult('✅ Данные не найдены. Можно регистрироваться.', 'success');
+            }
+        });
+    </script>
+</body>
+</html>

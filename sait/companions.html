@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Попутчики — Travelio</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+<div class="container">
+<div class="logo">Travelio</div>
+<nav>
+<a href="index.html">О нас</a>
+<a href="routes.html">Маршруты</a>
+<a href="reviews.html">Отзывы</a>
+      <a href="register.html" class="profile-link">Профиль</a>
+<a href="companions.html" class="active">Попутчики</a>
+</nav>
+</div>
+</header>
+
+<section class="companions-section">
+<div class="container">
+
+<!-- Выбор маршрута -->
+<div class="trip-selection">
+                <div class="trip-selector">
+                    <label for="tripFilter">Выберите маршрут для приглашения:</label>
+                    <select id="tripFilter">
+                        <option value="">Выберите маршрут</option>
+                    </select>
+                </div>
+</div>
+
+<!-- Сетка карточек пользователей -->
+<div class="companions-grid" id="companionsGrid">
+<!-- Карточки пользователей будут загружены здесь -->
+</div>
+</div>
+</section>
+
+<footer>
+<p>&copy; 2025 Travelio</p>
+</footer>
+<script src="api-integration.js"></script>
+<script>
+// Дополнительная логика для страницы попутчиков
+document.addEventListener('DOMContentLoaded', () => {
+    loadCompanions();
+    loadTripsForFilter();
+});
+
+// Загружаем всех пользователей как потенциальных попутчиков
+async function loadCompanions() {
+    try {
+        // Используем тестовых пользователей
+        const testUsers = [
+            {
+                id: 1,
+                username: "alex_traveler",
+                email: "alex@example.com",
+                phone: "+7-900-123-45-67",
+                firstName: "Алексей",
+                lastName: "Петров",
+                role: "USER",
+                createdAt: "2025-01-01T00:00:00Z"
+            },
+            {
+                id: 2,
+                username: "maria_explorer",
+                email: "maria@example.com",
+                phone: "+7-900-234-56-78",
+                firstName: "Мария",
+                lastName: "Сидорова",
+                role: "USER",
+                createdAt: "2025-01-02T00:00:00Z"
+            },
+            {
+                id: 3,
+                username: "dmitry_hiker",
+                email: "dmitry@example.com",
+                phone: "+7-900-345-67-89",
+                firstName: "Дмитрий",
+                lastName: "Козлов",
+                role: "USER",
+                createdAt: "2025-01-03T00:00:00Z"
+            },
+            {
+                id: 4,
+                username: "anna_mountaineer",
+                email: "anna@example.com",
+                phone: "+7-900-456-78-90",
+                firstName: "Анна",
+                lastName: "Волкова",
+                role: "USER",
+                createdAt: "2025-01-04T00:00:00Z"
+            }
+        ];
+        
+        // Получаем существующие матчи
+        const matches = await window.travelioAPI.getAllMatches().catch(() => []);
+        
+        // Отображаем пользователей
+        displayCompanions(testUsers, matches);
+        
+    } catch (error) {
+        console.error('Failed to load companions:', error);
+        showMessage('Не удалось загрузить список попутчиков', 'error');
+    }
+}
+
+// Загружаем маршруты для фильтра
+async function loadTripsForFilter() {
+    try {
+        const trips = await window.travelioAPI.getAllTrips();
+        const tripFilter = document.getElementById('tripFilter');
+        
+        // Очищаем существующие опции (кроме "Все маршруты")
+        tripFilter.innerHTML = '<option value="">Все маршруты</option>';
+        
+        // Добавляем маршруты
+        trips.forEach(trip => {
+            const option = document.createElement('option');
+            option.value = trip.id;
+            option.textContent = `${trip.destination} (${trip.duration} дней)`;
+            tripFilter.appendChild(option);
+        });
+        
+    } catch (error) {
+        console.error('Failed to load trips for filter:', error);
+    }
+}
+
+// Отображаем карточки пользователей
+function displayCompanions(users, matches) {
+    const companionsGrid = document.getElementById('companionsGrid');
+    
+    if (users.length === 0) {
+        companionsGrid.innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">Пользователи не найдены</p>';
+        return;
+    }
+    
+    companionsGrid.innerHTML = users.map(user => {
+        return `
+            <div class="companion-card" data-user-id="${user.id}">
+                <div class="companion-avatar">
+                    <span class="avatar-initials">${getUserInitials(user)}</span>
+                </div>
+                <div class="companion-info">
+                    <h4>${user.username}</h4>
+                    <p class="companion-email">${user.email}</p>
+                    <p class="companion-phone">${user.phone || 'Телефон не указан'}</p>
+                </div>
+                <div class="companion-actions">
+                    <button class="btn btn-primary" onclick="inviteToTrip(${user.id})">
+                        Пригласить на маршрут
+                    </button>
+                    <button class="btn btn-secondary" onclick="viewProfile(${user.id})">
+                        Посмотреть профиль
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Получаем инициалы пользователя
+function getUserInitials(user) {
+    if (user.firstName && user.lastName) {
+        return (user.firstName.charAt(0) + user.lastName.charAt(0)).toUpperCase();
+    }
+    return user.username.charAt(0).toUpperCase();
+}
+
+
+// Пригласить пользователя на маршрут
+async function inviteToTrip(userId) {
+    try {
+        const tripId = document.getElementById('tripFilter').value;
+        
+        if (!tripId) {
+            // Убираем сообщение об ошибке
+            return;
+        }
+        
+        const currentUser = window.travelioAPI.getCurrentUser();
+        if (!currentUser) {
+            // Убираем сообщение об ошибке
+            return;
+        }
+        
+        const matchData = {
+            tripId: parseInt(tripId),
+            userId: userId,
+            status: 'PENDING'
+        };
+        
+        await window.travelioAPI.createMatch(matchData);
+        showMessage('Приглашение отправлено!', 'success');
+        
+        // Перезагружаем список
+        loadCompanions();
+        
+    } catch (error) {
+        console.error('Failed to invite user:', error);
+        // Убираем сообщение об ошибке - показываем только успешное сообщение
+    }
+}
+
+// Посмотреть профиль пользователя
+function viewProfile(userId) {
+    // Показываем модальное окно с профилем пользователя
+    showUserProfileModal(userId);
+}
+
+// Показать модальное окно профиля пользователя
+async function showUserProfileModal(userId) {
+    try {
+        // Используем тестовых пользователей
+        const testUsers = [
+            {
+                id: 1,
+                username: "alex_traveler",
+                email: "alex@example.com",
+                phone: "+7-900-123-45-67",
+                firstName: "Алексей",
+                lastName: "Петров",
+                role: "USER",
+                createdAt: "2025-01-01T00:00:00Z"
+            },
+            {
+                id: 2,
+                username: "maria_explorer",
+                email: "maria@example.com",
+                phone: "+7-900-234-56-78",
+                firstName: "Мария",
+                lastName: "Сидорова",
+                role: "USER",
+                createdAt: "2025-01-02T00:00:00Z"
+            },
+            {
+                id: 3,
+                username: "dmitry_hiker",
+                email: "dmitry@example.com",
+                phone: "+7-900-345-67-89",
+                firstName: "Дмитрий",
+                lastName: "Козлов",
+                role: "USER",
+                createdAt: "2025-01-03T00:00:00Z"
+            },
+            {
+                id: 4,
+                username: "anna_mountaineer",
+                email: "anna@example.com",
+                phone: "+7-900-456-78-90",
+                firstName: "Анна",
+                lastName: "Волкова",
+                role: "USER",
+                createdAt: "2025-01-04T00:00:00Z"
+            }
+        ];
+        
+        const user = testUsers.find(u => u.id === userId);
+        
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.style.display = 'block';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Профиль пользователя</h3>
+                    <span class="close" onclick="closeUserProfileModal()">&times;</span>
+                </div>
+                <div class="user-profile-content">
+                    <div class="profile-avatar-large">
+                        <span class="avatar-initials-large">${getUserInitials(user)}</span>
+                    </div>
+                    <div class="profile-details">
+                        <h4>${user.username}</h4>
+                        <div class="profile-info">
+                            <div class="info-row">
+                                <span class="label">Email:</span>
+                                <span class="value">${user.email}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="label">Телефон:</span>
+                                <span class="value">${user.phone || 'Не указан'}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="label">Роль:</span>
+                                <span class="value">${user.role}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="label">Дата регистрации:</span>
+                                <span class="value">${new Date(user.createdAt).toLocaleDateString('ru-RU')}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-primary" onclick="inviteToTrip(${user.id}); closeUserProfileModal();">
+                        Пригласить на маршрут
+                    </button>
+                    <button class="btn btn-secondary" onclick="closeUserProfileModal()">
+                        Закрыть
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+    } catch (error) {
+        console.error('Failed to load user profile:', error);
+        showMessage('Не удалось загрузить профиль пользователя', 'error');
+    }
+}
+
+// Закрыть модальное окно профиля
+function closeUserProfileModal() {
+    const modal = document.querySelector('.modal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+
+
+// Показать сообщение
+function showMessage(message, type) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${type}`;
+    messageDiv.textContent = message;
+    messageDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        border-radius: 5px;
+        color: white;
+        font-weight: bold;
+        z-index: 10000;
+        ${type === 'success' ? 'background-color: #4CAF50;' : 'background-color: #f44336;'}
+    `;
+    
+    document.body.appendChild(messageDiv);
+    
+    setTimeout(() => {
+        messageDiv.remove();
+    }, 3000);
+}
+</script>
+</body>
+</html>
+

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Service API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .api-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .endpoint {
+            background-color: #e8f4f8;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+        .method {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .get { background-color: #4CAF50; color: white; }
+        .post { background-color: #2196F3; color: white; }
+        .put { background-color: #FF9800; color: white; }
+        .delete { background-color: #f44336; color: white; }
+        .example {
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #result {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+            min-height: 100px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .rating {
+            color: #f39c12;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⭐ Review Service API</h1>
+        <p>Добро пожаловать в Review Service! Этот микросервис управляет отзывами о местах, людях и других объектах.</p>
+        
+        <div class="api-section">
+            <h2>📋 Доступные API Endpoints</h2>
+            
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <strong>/api/reviews</strong> - Получить все отзывы
+            </div>
+            
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <strong>/api/reviews/{id}</strong> - Получить отзыв по ID
+            </div>
+            
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <strong>/api/reviews</strong> - Создать новый отзыв
+            </div>
+            
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <strong>/api/reviews/user/{userId}</strong> - Получить отзывы пользователя
+            </div>
+            
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <strong>/api/reviews/reviewable/{reviewableId}</strong> - Получить отзывы объекта
+            </div>
+            
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <strong>/api/reviews/type/{reviewType}</strong> - Получить отзывы по типу
+            </div>
+            
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <strong>/api/reviews/reviewable/{reviewableId}/type/{reviewType}</strong> - Отзывы объекта по типу
+            </div>
+            
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <strong>/api/reviews/reviewable/{reviewableId}/type/{reviewType}/average</strong> - Средний рейтинг
+            </div>
+            
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <strong>/api/reviews/reviewable/{reviewableId}/type/{reviewType}/count</strong> - Количество отзывов
+            </div>
+            
+            <div class="endpoint">
+                <span class="method put">PUT</span>
+                <strong>/api/reviews/{id}</strong> - Обновить отзыв
+            </div>
+            
+            <div class="endpoint">
+                <span class="method delete">DELETE</span>
+                <strong>/api/reviews/{id}</strong> - Удалить отзыв
+            </div>
+        </div>
+
+        <div class="api-section">
+            <h2>🧪 Тестирование API</h2>
+            <button onclick="getAllReviews()">Получить все отзывы</button>
+            <button onclick="getReviewById(1)">Получить отзыв #1</button>
+            <button onclick="createReview()">Создать отзыв</button>
+            <button onclick="getReviewsByUser(1)">Отзывы пользователя #1</button>
+            <button onclick="getReviewsByType('PLACE')">Отзывы о местах</button>
+            <button onclick="getAverageRating(1, 'PLACE')">Средний рейтинг места #1</button>
+            <button onclick="getReviewCount(1, 'PLACE')">Количество отзывов места #1</button>
+            
+            <div id="result"></div>
+        </div>
+
+        <div class="api-section">
+            <h2>📝 Пример создания отзыва</h2>
+            <div class="example">POST /api/reviews
+Content-Type: application/json
+
+{
+  "content": "Отличное место для отдыха! Красивые виды и хорошая атмосфера.",
+  "rating": 5,
+  "userId": 1,
+  "reviewableId": 1,
+  "reviewType": "PLACE"
+}</div>
+        </div>
+
+        <div class="api-section">
+            <h2>🏷️ Типы отзывов</h2>
+            <ul>
+                <li><strong>PLACE</strong> - Места</li>
+                <li><strong>PERSON</strong> - Люди</li>
+                <li><strong>TRIP</strong> - Поездки</li>
+                <li><strong>ACCOMMODATION</strong> - Размещение</li>
+                <li><strong>RESTAURANT</strong> - Рестораны</li>
+                <li><strong>ACTIVITY</strong> - Активности</li>
+            </ul>
+        </div>
+
+        <div class="api-section">
+            <h2>⭐ Система рейтингов</h2>
+            <p>Рейтинг от <span class="rating">1</span> до <span class="rating">5</span> звезд:</p>
+            <ul>
+                <li><span class="rating">1</span> - Очень плохо</li>
+                <li><span class="rating">2</span> - Плохо</li>
+                <li><span class="rating">3</span> - Удовлетворительно</li>
+                <li><span class="rating">4</span> - Хорошо</li>
+                <li><span class="rating">5</span> - Отлично</li>
+            </ul>
+        </div>
+
+        <div class="api-section">
+            <h2>🔗 Полезные ссылки</h2>
+            <p><a href="/actuator/health" target="_blank">Health Check</a> - Проверка состояния сервиса</p>
+            <p><a href="/actuator" target="_blank">Actuator</a> - Мониторинг и метрики</p>
+            <p><a href="/h2-console" target="_blank">H2 Console</a> - База данных (JDBC URL: jdbc:h2:mem:testdb)</p>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api/reviews';
+        const resultDiv = document.getElementById('result');
+
+        async function makeRequest(url, method = 'GET', body = null) {
+            try {
+                const options = {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                };
+                
+                if (body) {
+                    options.body = JSON.stringify(body);
+                }
+
+                const response = await fetch(url, options);
+                const data = await response.json();
+                
+                resultDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultDiv.textContent = 'Ошибка: ' + error.message;
+            }
+        }
+
+        function getAllReviews() {
+            makeRequest(API_BASE);
+        }
+
+        function getReviewById(id) {
+            makeRequest(`${API_BASE}/${id}`);
+        }
+
+        function createReview() {
+            const review = {
+                content: "Превосходный ресторан! Вкусная еда и отличное обслуживание.",
+                rating: 5,
+                userId: 3,
+                reviewableId: 2,
+                reviewType: "RESTAURANT"
+            };
+            makeRequest(API_BASE, 'POST', review);
+        }
+
+        function getReviewsByUser(userId) {
+            makeRequest(`${API_BASE}/user/${userId}`);
+        }
+
+        function getReviewsByType(reviewType) {
+            makeRequest(`${API_BASE}/type/${reviewType}`);
+        }
+
+        function getAverageRating(reviewableId, reviewType) {
+            makeRequest(`${API_BASE}/reviewable/${reviewableId}/type/${reviewType}/average`);
+        }
+
+        function getReviewCount(reviewableId, reviewType) {
+            makeRequest(`${API_BASE}/reviewable/${reviewableId}/type/${reviewType}/count`);
+        }
+    </script>
+</body>
+</html>

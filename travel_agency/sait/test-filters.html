@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест фильтров</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .filter-group { margin: 20px 0; }
+        .radio { display: block; margin: 5px 0; }
+        .card { border: 1px solid #ccc; margin: 10px 0; padding: 10px; }
+        .routes-counter { font-weight: bold; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>Тест фильтрации маршрутов</h1>
+    
+    <div class="filter-group">
+        <h3>Тип маршрута</h3>
+        <label class="radio"><input type="radio" class="filter-radio" name="type" value=""> Все</label>
+        <label class="radio"><input type="radio" class="filter-radio" name="type" value="пеший"> Пеший</label>
+        <label class="radio"><input type="radio" class="filter-radio" name="type" value="велосипед"> Велосипед</label>
+        <label class="radio"><input type="radio" class="filter-radio" name="type" value="водный"> Водный</label>
+    </div>
+    
+    <div class="filter-group">
+        <h3>Сложность</h3>
+        <label class="radio"><input type="radio" class="filter-radio" name="difficulty" value=""> Все</label>
+        <label class="radio"><input type="radio" class="filter-radio" name="difficulty" value="лёгкая"> Лёгкая</label>
+        <label class="radio"><input type="radio" class="filter-radio" name="difficulty" value="средняя"> Средняя</label>
+        <label class="radio"><input type="radio" class="filter-radio" name="difficulty" value="сложная"> Сложная</label>
+    </div>
+    
+    <div class="filter-group">
+        <h3>Регион</h3>
+        <label class="radio"><input type="radio" class="filter-radio" name="region" value=""> Все</label>
+        <label class="radio"><input type="radio" class="filter-radio" name="region" value="горы"> Горы</label>
+        <label class="radio"><input type="radio" class="filter-radio" name="region" value="лес"> Лес</label>
+        <label class="radio"><input type="radio" class="filter-radio" name="region" value="побережье"> Побережье</label>
+    </div>
+    
+    <button onclick="document.querySelectorAll('.filter-radio').forEach(r=>r.checked=false);applyFilters();">Сбросить</button>
+    
+    <div class="routes-counter">Найдено: 0 маршрутов</div>
+    
+    <div id="routesGrid">
+        <div class="card" data-title="Горный перевал" data-type="пеший" data-difficulty="средняя" data-region="горы" data-days="5">
+            <h3>Горный перевал — 5 дней</h3>
+            <p>Пеший, Средняя, Горы</p>
+        </div>
+        <div class="card" data-title="Береговое приключение" data-type="водный" data-difficulty="лёгкая" data-region="побережье" data-days="3">
+            <h3>Береговое приключение — 3 дня</h3>
+            <p>Водный, Лёгкая, Побережье</p>
+        </div>
+        <div class="card" data-title="Лесной трек" data-type="пеший" data-difficulty="лёгкая" data-region="лес" data-days="2">
+            <h3>Лесной трек — 2 дня</h3>
+            <p>Пеший, Лёгкая, Лес</p>
+        </div>
+        <div class="card" data-title="Сложный горный маршрут" data-type="пеший" data-difficulty="сложная" data-region="горы" data-days="7">
+            <h3>Сложный горный маршрут — 7 дней</h3>
+            <p>Пеший, Сложная, Горы</p>
+        </div>
+        <div class="card" data-title="Велосипедный тур" data-type="велосипед" data-difficulty="средняя" data-region="лес" data-days="4">
+            <h3>Велосипедный тур — 4 дня</h3>
+            <p>Велосипед, Средняя, Лес</p>
+        </div>
+    </div>
+
+    <script>
+        const filterSearch = document.querySelector('#filterSearch');
+        const routeGrid = document.querySelector('#routesGrid');
+        
+        function applyFilters(){
+            console.log('Применяем фильтры...');
+            const activeType = document.querySelector('input[name="type"]:checked')?.value || '';
+            const activeDiff = document.querySelector('input[name="difficulty"]:checked')?.value || '';
+            const activeRegion = document.querySelector('input[name="region"]:checked')?.value || '';
+            const cards = routeGrid ? routeGrid.querySelectorAll('.card[data-type]') : [];
+            
+            console.log('Найдено карточек:', cards.length);
+            console.log('Активные фильтры:', {activeType, activeDiff, activeRegion});
+            
+            let visibleCount = 0;
+            
+            // Проверяем, есть ли активные фильтры
+            const hasActiveFilters = activeType || activeDiff || activeRegion;
+            
+            cards.forEach(card => {
+                const type = card.dataset.type;
+                const diff = card.dataset.difficulty;
+                const region = card.dataset.region;
+                
+                let ok = true;
+                
+                // Если ничего не выбрано → показываются все маршруты
+                if (!hasActiveFilters) {
+                    ok = true;
+                } else {
+                    // Если выбран один признак → фильтрация работает ТОЛЬКО по этому признаку
+                    // Если выбрано несколько признаков → фильтрация работает ТОЛЬКО по всем выбранным
+                    
+                    // Фильтр по типу
+                    if(activeType && activeType !== '') {
+                        ok = ok && activeType === type;
+                    }
+                    
+                    // Фильтр по сложности
+                    if(activeDiff && activeDiff !== '') {
+                        ok = ok && activeDiff === diff;
+                    }
+                    
+                    // Фильтр по региону
+                    if(activeRegion && activeRegion !== '') {
+                        ok = ok && activeRegion === region;
+                    }
+                }
+                
+                if(ok) visibleCount++;
+                card.style.display = ok ? '' : 'none';
+            });
+            
+            // Обновляем счетчик найденных маршрутов
+            const counter = document.querySelector('.routes-counter');
+            if(counter) {
+                counter.textContent = `Найдено: ${visibleCount} маршрутов`;
+            }
+        }
+        
+        document.querySelectorAll('.filter-radio').forEach(r => r.addEventListener('change', applyFilters));
+        
+        // Применяем фильтры при загрузке страницы
+        document.addEventListener('DOMContentLoaded', applyFilters);
+    </script>
+</body>
+</html>

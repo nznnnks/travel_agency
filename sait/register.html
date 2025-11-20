@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Регистрация — Travelio</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+<div class="container">
+<div class="logo">Travelio</div>
+<nav>
+<a href="index.html">О нас</a>
+<a href="routes.html">Маршруты</a>
+<a href="reviews.html">Отзывы</a>
+      <a href="register.html" class="profile-link">Профиль</a>
+<a href="companions.html">Попутчики</a>
+</nav>
+</div>
+</header>
+
+<section class="register">
+<div class="register-container">
+<!-- Форма авторизации -->
+<div id="login-section">
+<h2>Вход в аккаунт</h2>
+<form class="register-form" id="loginForm">
+<div class="form-group">
+<label for="loginEmail">Email:</label>
+<input type="email" id="loginEmail" name="email" required placeholder="example@email.com">
+<div class="error-message" id="login-email-error"></div>
+</div>
+
+<div class="form-group">
+<label for="loginPassword">Пароль:</label>
+<input type="password" id="loginPassword" name="password" required placeholder="Введите пароль">
+<div class="error-message" id="login-password-error"></div>
+</div>
+
+<button type="submit" class="btn">Войти</button>
+<div class="form-message" id="login-message"></div>
+</form>
+
+        <div class="auth-switch">
+            <p>Нет аккаунта? <a href="#" onclick="showRegistration()">Зарегистрироваться</a></p>
+        </div>
+</div>
+
+<!-- Форма регистрации -->
+<div id="registration-section" style="display: none;">
+<h2>Регистрация</h2>
+<form class="register-form" id="regForm">
+<div class="form-group">
+<label for="username">Имя пользователя:</label>
+<input type="text" id="username" name="username" required minlength="3" maxlength="50" placeholder="От 3 до 50 символов">
+<div class="error-message" id="username-error"></div>
+</div>
+
+<div class="form-group">
+<label for="email">Email:</label>
+<input type="email" id="email" name="email" required placeholder="example@email.com">
+<div class="error-message" id="email-error"></div>
+</div>
+
+<div class="form-group">
+<label for="password">Пароль:</label>
+<input type="password" id="password" name="password" required minlength="6" placeholder="Минимум 6 символов">
+<div class="error-message" id="password-error"></div>
+</div>
+
+<div class="form-group">
+<label for="firstName">Имя:</label>
+<input type="text" id="firstName" name="firstName" required maxlength="50" placeholder="Ваше имя">
+<div class="error-message" id="firstName-error"></div>
+</div>
+
+<div class="form-group">
+<label for="lastName">Фамилия:</label>
+<input type="text" id="lastName" name="lastName" required maxlength="50" placeholder="Ваша фамилия">
+<div class="error-message" id="lastName-error"></div>
+</div>
+
+<div class="form-group">
+<label for="phone">Телефон (необязательно):</label>
+<input type="tel" id="phone" name="phone" placeholder="+7 (999) 123-45-67">
+</div>
+
+<button type="submit" class="btn">Зарегистрироваться</button>
+<div class="form-message" id="form-message"></div>
+</form>
+
+<div class="auth-switch">
+<p>Уже есть аккаунт? <a href="#" onclick="showLogin()">Войти</a></p>
+</div>
+</div>
+
+<!-- Профиль пользователя -->
+<div id="profile-section" style="display: none;">
+<h2>Мой профиль</h2>
+<div class="profile-content">
+<div class="profile-info">
+<div class="profile-avatar">
+<div class="avatar-placeholder">
+<span id="profile-initials">П</span>
+</div>
+</div>
+<div class="profile-details">
+<h3 id="profile-name">Пользователь</h3>
+<div class="profile-stats">
+<div class="stat-item">
+<span class="stat-label">Статус:</span>
+<span class="stat-value" id="profile-status">Активный пользователь</span>
+</div>
+<div class="stat-item">
+<span class="stat-label">Дата регистрации:</span>
+<span class="stat-value" id="profile-regdate">Сегодня</span>
+</div>
+</div>
+</div>
+</div>
+
+<div class="profile-sections">
+<div class="profile-section">
+<h4>Личная информация</h4>
+<div class="info-grid">
+<div class="info-item">
+<label>Имя пользователя:</label>
+<span id="profile-username">-</span>
+</div>
+<div class="info-item">
+<label>Email:</label>
+<span id="profile-email">-</span>
+</div>
+<div class="info-item">
+<label>Телефон:</label>
+<span id="profile-phone">-</span>
+</div>
+<div class="info-item">
+<label>Роль:</label>
+<span id="profile-role">Пользователь</span>
+</div>
+</div>
+</div>
+</div>
+
+<div class="profile-actions">
+<button class="btn btn-secondary" onclick="logout()">Выйти из аккаунта</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<footer>
+<p>&copy; 2025 Travelio</p>
+</footer>
+<script src="api-integration.js"></script>
+<script>
+// Обработчик формы регистрации
+document.addEventListener('DOMContentLoaded', function() {
+    const regForm = document.getElementById('regForm');
+    const loginForm = document.getElementById('loginForm');
+    
+    if (regForm) {
+        regForm.addEventListener('submit', handleRegistration);
+    }
+    
+    if (loginForm) {
+        loginForm.addEventListener('submit', handleLogin);
+    }
+    
+    // Проверяем, авторизован ли пользователь
+    checkAuthStatus();
+});
+
+// Проверка статуса авторизации
+function checkAuthStatus() {
+    if (window.travelioAPI && window.travelioAPI.isAuthenticated()) {
+        showProfile();
+    } else {
+        showLogin();
+    }
+}
+
+// Показать форму авторизации
+function showLogin() {
+    document.getElementById('login-section').style.display = 'block';
+    document.getElementById('registration-section').style.display = 'none';
+    document.getElementById('profile-section').style.display = 'none';
+    document.querySelector('h2').textContent = 'Вход в аккаунт';
+}
+
+// Показать форму регистрации
+function showRegistration() {
+    document.getElementById('login-section').style.display = 'none';
+    document.getElementById('registration-section').style.display = 'block';
+    document.getElementById('profile-section').style.display = 'none';
+    document.querySelector('h2').textContent = 'Регистрация';
+}
+
+// Показать профиль пользователя
+function showProfile() {
+    document.getElementById('login-section').style.display = 'none';
+    document.getElementById('registration-section').style.display = 'none';
+    document.getElementById('profile-section').style.display = 'block';
+    document.querySelector('h2').textContent = 'Мой профиль';
+    
+    // Загружаем данные пользователя
+    loadUserProfile();
+}
+
+// Загрузка данных профиля
+function loadUserProfile() {
+    const user = window.travelioAPI ? window.travelioAPI.getCurrentUser() : null;
+    
+    if (user) {
+        // Заполняем основные данные профиля
+        document.getElementById('profile-username').textContent = user.username || '-';
+        document.getElementById('profile-email').textContent = user.email || '-';
+        document.getElementById('profile-phone').textContent = user.phone || 'Не указан';
+        document.getElementById('profile-role').textContent = user.role || 'Пользователь';
+        
+        // Устанавливаем имя в заголовке
+        document.getElementById('profile-name').textContent = user.username || 'Пользователь';
+        
+        // Устанавливаем инициалы для аватара
+        const initials = getInitials(user.username);
+        document.getElementById('profile-initials').textContent = initials;
+        
+        // Устанавливаем дату регистрации
+        const regDate = user.createdAt ? new Date(user.createdAt).toLocaleDateString('ru-RU') : 'Сегодня';
+        document.getElementById('profile-regdate').textContent = regDate;
+    }
+}
+
+
+// Получение инициалов для аватара
+function getInitials(username) {
+    if (username && username.length >= 2) {
+        return username.substring(0, 2).toUpperCase();
+    } else if (username && username.length === 1) {
+        return username.toUpperCase();
+    } else {
+        return 'П';
+    }
+}
+
+// Обработка формы авторизации
+async function handleLogin(event) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const formData = new FormData(form);
+    
+    const email = formData.get('email');
+    const password = formData.get('password');
+    
+    // Очищаем предыдущие ошибки
+    clearLoginErrors();
+    
+    // Валидация
+    if (!email || !isValidEmail(email)) {
+        showLoginFieldError('login-email-error', 'Введите корректный email адрес');
+        return;
+    }
+    
+    if (!password || password.length < 6) {
+        showLoginFieldError('login-password-error', 'Пароль должен содержать минимум 6 символов');
+        return;
+    }
+    
+    const loginData = {
+        email: email,
+        password: password
+    };
+
+    try {
+        const response = await window.travelioAPI.loginUser(loginData);
+        
+        // Создаем объект пользователя из ответа
+        const user = {
+            id: response.id,
+            username: response.username,
+            email: response.email,
+            firstName: response.firstName || '',
+            lastName: response.lastName || '',
+            phone: response.phone || '',
+            role: response.role
+        };
+        
+        // Сохраняем данные пользователя
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        localStorage.setItem('authToken', response.token || 'dummy-token');
+        
+        // Показываем профиль сразу после успешного входа
+        showProfile();
+        if (window.travelioAPI) {
+            window.travelioAPI.updateNavigation();
+        }
+        
+        // Показываем успешное сообщение
+        showLoginMessage('Вход выполнен успешно!', 'success');
+        
+    } catch (error) {
+        console.error('Login error:', error);
+        
+        // Показываем понятное сообщение об ошибке на русском языке
+        let errorMessage = error.message;
+        
+        // Дополнительная обработка специфичных ошибок
+        if (errorMessage.includes('Failed to fetch')) {
+            errorMessage = 'Не удается подключиться к серверу. Проверьте подключение к интернету.';
+        } else if (errorMessage.includes('NetworkError')) {
+            errorMessage = 'Ошибка сети. Сервер недоступен.';
+        } else if (errorMessage.includes('timeout')) {
+            errorMessage = 'Превышено время ожидания. Попробуйте снова.';
+        }
+        
+        showLoginMessage(errorMessage, 'error');
+    }
+}
+
+// Функция выхода из аккаунта
+function logout() {
+    // Очищаем данные пользователя
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
+    localStorage.removeItem('currentUser');
+    
+    // Показываем форму авторизации
+    showLogin();
+    
+    // Обновляем навигацию
+    if (window.travelioAPI) {
+        window.travelioAPI.updateNavigation();
+    }
+    
+    showSuccessNotification('Вы успешно вышли из аккаунта');
+}
+
+// Функция очистки всех данных (для решения проблем с регистрацией)
+function clearAllData() {
+    if (confirm('Очистить все данные браузера? Это поможет решить проблемы с регистрацией.')) {
+        localStorage.clear();
+        sessionStorage.clear();
+        showLogin();
+        if (window.travelioAPI) {
+            window.travelioAPI.updateNavigation();
+        }
+        showSuccessNotification('Все данные очищены. Теперь можно регистрироваться без ошибок.');
+    }
+}
+
+// Вспомогательные функции для формы авторизации
+function clearLoginErrors() {
+    const errorElements = document.querySelectorAll('#login-section .error-message');
+    errorElements.forEach(element => {
+        element.textContent = '';
+        element.classList.remove('show');
+    });
+    
+    const inputElements = document.querySelectorAll('#login-section input');
+    inputElements.forEach(input => {
+        input.classList.remove('error');
+    });
+}
+
+function showLoginFieldError(errorId, message) {
+    const errorElement = document.getElementById(errorId);
+    if (errorElement) {
+        errorElement.textContent = message;
+        errorElement.classList.add('show');
+    }
+    
+    // Подсвечиваем поле с ошибкой
+    const fieldName = errorId.replace('-error', '').replace('login-', '');
+    const inputElement = document.getElementById(`login${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)}`);
+    if (inputElement) {
+        inputElement.classList.add('error');
+    }
+}
+
+function showLoginMessage(message, type) {
+    const messageElement = document.getElementById('login-message');
+    if (messageElement) {
+        messageElement.textContent = message;
+        messageElement.className = `form-message ${type}`;
+        messageElement.style.display = 'block';
+        
+        // Автоматически скрываем через 5 секунд
+        setTimeout(() => {
+            messageElement.style.display = 'none';
+        }, 5000);
+    }
+}
+
+// Функции для уведомлений
+function showSuccessNotification(message) {
+    showNotification(message, 'success');
+}
+
+function showErrorNotification(message) {
+    showNotification(message, 'error');
+}
+
+function showNotification(message, type) {
+    // Удаляем существующие уведомления
+    const existingNotifications = document.querySelectorAll('.notification');
+    existingNotifications.forEach(notification => notification.remove());
+    
+    // Создаем новое уведомление
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
+    
+    // Стили для уведомления
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 16px 24px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 600;
+        z-index: 10000;
+        animation: slideInFromRight 0.3s ease-out;
+        max-width: 400px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    `;
+    
+    if (type === 'success') {
+        notification.style.backgroundColor = '#10B981';
+    } else if (type === 'error') {
+        notification.style.backgroundColor = '#EF4444';
+    }
+    
+    document.body.appendChild(notification);
+    
+    // Автоматически удаляем через 4 секунды
+    setTimeout(() => {
+        notification.style.animation = 'slideOutToRight 0.3s ease-in';
+        setTimeout(() => notification.remove(), 300);
+    }, 4000);
+}
+
+// Переопределяем handleRegistration для показа авторизации после регистрации
+const originalHandleRegistration = window.handleRegistration;
+window.handleRegistration = function(event) {
+    event.preventDefault();
+    
+    // Вызываем оригинальную функцию
+    originalHandleRegistration(event).then(() => {
+        // После успешной регистрации показываем форму авторизации
+        setTimeout(() => {
+            showLogin();
+            showLoginMessage('Регистрация успешна! Теперь войдите в аккаунт.', 'success');
+        }, 1000);
+    }).catch(() => {
+        // Ошибка регистрации - остаемся на форме
+    });
+};
+</script>
+</body>
+</html>

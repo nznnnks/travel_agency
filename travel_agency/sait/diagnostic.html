@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Диагностика подключения — Travelio</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+        button {
+            background: #FF6B35;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #E55A2B;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            border-left: 4px solid #28a745;
+            background: #d4edda;
+        }
+        .error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        .info {
+            border-left-color: #17a2b8;
+            background: #d1ecf1;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Диагностика подключения к серверу</h1>
+    
+    <div class="test-section">
+        <h3>1. Проверка доступности сервисов</h3>
+        <button onclick="testHealthEndpoint()">Проверить Health endpoint</button>
+        <button onclick="testAllServices()">Проверить все сервисы</button>
+        <div id="health-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>2. Тест регистрации</h3>
+        <button onclick="testRegistration()">Тест регистрации</button>
+        <div id="registration-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>3. Информация о браузере</h3>
+        <button onclick="showBrowserInfo()">Показать информацию о браузере</button>
+        <div id="browser-info"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>4. Очистка данных</h3>
+        <button onclick="clearAllData()">Очистить все данные</button>
+        <div id="clear-result"></div>
+    </div>
+
+    <script>
+        async function testHealthEndpoint() {
+            const resultDiv = document.getElementById('health-result');
+            resultDiv.innerHTML = '<div class="info">⏳ Проверяем health endpoint...</div>';
+            
+            try {
+                const response = await fetch('http://127.0.0.1:8080/api/users/health', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.text();
+                    resultDiv.innerHTML = `
+                        <div class="result">
+                            ✅ <strong>Health endpoint работает!</strong><br>
+                            Статус: ${response.status}<br>
+                            Ответ: ${data}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            ❌ <strong>Ошибка health endpoint:</strong><br>
+                            Статус: ${response.status}<br>
+                            Статус текст: ${response.statusText}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        ❌ <strong>Ошибка подключения:</strong><br>
+                        ${error.message}<br>
+                        <strong>Возможные причины:</strong><br>
+                        • Сервер не запущен<br>
+                        • Блокировка браузера<br>
+                        • Проблемы с CORS<br>
+                        • Антивирус блокирует соединение
+                    </div>
+                `;
+            }
+        }
+        
+        async function testAllServices() {
+            const resultDiv = document.getElementById('health-result');
+            resultDiv.innerHTML = '<div class="info">⏳ Проверяем все сервисы...</div>';
+            
+            const services = [
+                { name: 'API Gateway', url: 'http://127.0.0.1:8080/api/users/health' },
+                { name: 'User Service', url: 'http://127.0.0.1:8084/api/users/health' },
+                { name: 'Trip Service', url: 'http://127.0.0.1:8081/api/trips/health' },
+                { name: 'Review Service', url: 'http://127.0.0.1:8082/api/reviews/health' },
+                { name: 'Match Service', url: 'http://127.0.0.1:8083/api/matches/health' },
+                { name: 'Eureka Server', url: 'http://127.0.0.1:8761' }
+            ];
+            
+            let results = [];
+            
+            for (const service of services) {
+                try {
+                    const response = await fetch(service.url, {
+                        method: 'GET',
+                        headers: { 'Accept': 'application/json' }
+                    });
+                    
+                    if (response.ok) {
+                        results.push(`✅ ${service.name}: OK (${response.status})`);
+                    } else {
+                        results.push(`⚠️ ${service.name}: ${response.status} ${response.statusText}`);
+                    }
+                } catch (error) {
+                    results.push(`❌ ${service.name}: ${error.message}`);
+                }
+            }
+            
+            resultDiv.innerHTML = `
+                <div class="result">
+                    <strong>Результаты проверки сервисов:</strong><br>
+                    ${results.join('<br>')}
+                </div>
+            `;
+        }
+        
+        async function testRegistration() {
+            const resultDiv = document.getElementById('registration-result');
+            resultDiv.innerHTML = '<div class="info">⏳ Тестируем регистрацию...</div>';
+            
+            const userData = {
+                username: 'testuser' + Date.now(),
+                email: 'test' + Date.now() + '@example.com',
+                password: '123456',
+                firstName: 'Test',
+                lastName: 'User',
+                phone: '+1234567890'
+            };
+            
+            try {
+                console.log('Отправляем данные:', userData);
+                
+                const response = await fetch('http://127.0.0.1:8080/api/users/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(userData)
+                });
+                
+                console.log('Ответ сервера:', response.status, response.statusText);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.innerHTML = `
+                        <div class="result">
+                            ✅ <strong>Регистрация работает!</strong><br>
+                            ID: ${data.id}<br>
+                            Username: ${data.username}<br>
+                            Email: ${data.email}<br>
+                            Token: ${data.token.substring(0, 20)}...
+                        </div>
+                    `;
+                } else {
+                    let errorMessage = `Ошибка ${response.status}: ${response.statusText}`;
+                    try {
+                        const errorData = await response.json();
+                        errorMessage = errorData.message || errorMessage;
+                    } catch (e) {
+                        // Игнорируем ошибку парсинга JSON
+                    }
+                    
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            ❌ <strong>Ошибка регистрации:</strong><br>
+                            ${errorMessage}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        ❌ <strong>Ошибка сети:</strong><br>
+                        ${error.message}<br>
+                        <strong>Тип ошибки:</strong> ${error.name}<br>
+                        <strong>Подробности:</strong><br>
+                        <pre>${error.stack}</pre>
+                    </div>
+                `;
+            }
+        }
+        
+        function showBrowserInfo() {
+            const resultDiv = document.getElementById('browser-info');
+            
+            const info = {
+                'User Agent': navigator.userAgent,
+                'URL': window.location.href,
+                'Protocol': window.location.protocol,
+                'Host': window.location.host,
+                'Local Storage': typeof(Storage) !== "undefined" ? "Поддерживается" : "Не поддерживается",
+                'Fetch API': typeof(fetch) !== "undefined" ? "Поддерживается" : "Не поддерживается",
+                'CORS': "Проверяется автоматически",
+                'Cookies': navigator.cookieEnabled ? "Включены" : "Отключены"
+            };
+            
+            let infoHtml = '<div class="result"><strong>Информация о браузере:</strong><br>';
+            for (const [key, value] of Object.entries(info)) {
+                infoHtml += `${key}: ${value}<br>`;
+            }
+            infoHtml += '</div>';
+            
+            resultDiv.innerHTML = infoHtml;
+        }
+        
+        function clearAllData() {
+            const resultDiv = document.getElementById('clear-result');
+            
+            try {
+                localStorage.clear();
+                sessionStorage.clear();
+                resultDiv.innerHTML = `
+                    <div class="result">
+                        ✅ <strong>Все данные очищены!</strong><br>
+                        • localStorage очищен<br>
+                        • sessionStorage очищен<br>
+                        Теперь можно попробовать регистрацию снова.
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        ❌ <strong>Ошибка при очистке:</strong><br>
+                        ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        // Автоматически запускаем проверку при загрузке
+        window.addEventListener('load', function() {
+            console.log('Страница диагностики загружена');
+            testHealthEndpoint();
+        });
+    </script>
+</body>
+</html>
