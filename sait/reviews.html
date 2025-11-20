@@ -99,31 +99,45 @@ const reviewCard = document.querySelector('.review-card');
 const prevBtn = document.querySelector('.review-prev');
 const nextBtn = document.querySelector('.review-next');
 
+// Дефолтные отзывы для отображения при ошибке загрузки
+function loadDefaultReviews() {
+  reviews = [{
+    name: "Мария П.",
+    content: "Отличный маршрут в горах! Красивые виды и безопасно.",
+    rating: 5,
+    image: "images/review1.png"
+  }];
+  if (reviews.length > 0) {
+    showReview(0);
+  }
+}
+
 // Функция загрузки отзывов из API
 async function loadReviews() {
   try {
-    const response = await fetch('http://localhost:8082/api/reviews');
-    if (response.ok) {
-      const apiReviews = await response.json();
-      console.log('Загружены отзывы из API:', apiReviews);
-      
-      // Преобразуем отзывы из API в формат для отображения
-      reviews = apiReviews.map(review => ({
-        name: "Пользователь", // Пока используем общее имя
-        content: review.content,
-        rating: review.rating,
-        image: "images/review1.png" // Аватарка пользователя
-      }));
-      
-      console.log('Преобразованные отзывы:', reviews);
-      
-      // Если есть отзывы, показываем первый
-      if (reviews.length > 0) {
-        showReview(0);
-      }
+    if (!window.travelioAPI) {
+      console.error('TravelioAPI не инициализирован');
+      loadDefaultReviews();
+      return;
+    }
+    
+    const apiReviews = await window.travelioAPI.getAllReviews();
+    console.log('Загружены отзывы из API:', apiReviews);
+    
+    // Преобразуем отзывы из API в формат для отображения
+    reviews = apiReviews.map(review => ({
+      name: "Пользователь", // Пока используем общее имя
+      content: review.content,
+      rating: review.rating,
+      image: "images/review1.png" // Аватарка пользователя
+    }));
+    
+    console.log('Преобразованные отзывы:', reviews);
+    
+    // Если есть отзывы, показываем первый
+    if (reviews.length > 0) {
+      showReview(0);
     } else {
-      console.error('Ошибка загрузки отзывов:', response.status);
-      // Используем дефолтные отзывы при ошибке
       loadDefaultReviews();
     }
   } catch (error) {
@@ -192,44 +206,43 @@ async function handleAddReview() {
   }
   
   try {
+    if (!window.travelioAPI) {
+      throw new Error('TravelioAPI не инициализирован');
+    }
+    
+    // Получаем текущего пользователя
+    const currentUser = window.travelioAPI.getCurrentUser();
+    if (!currentUser) {
+      showErrorNotification('Необходимо войти в систему для добавления отзыва');
+      return;
+    }
+    
     // Создаем новый отзыв
     const newReview = {
       content: reviewText,
       rating: parseInt(rating),
-      userId: 1, // Временно используем ID 1, позже можно будет получать из сессии
+      userId: currentUser.id,
       reviewableId: 1, // ID маршрута или другого объекта для отзыва
       reviewType: "TRIP" // Тип отзыва - для маршрутов
     };
     
     console.log('Отправляем отзыв:', newReview);
     
-    // Отправляем запрос к API
-    const response = await fetch('http://localhost:8082/api/reviews', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(newReview)
-    });
+    // Используем API для создания отзыва
+    const savedReview = await window.travelioAPI.createReview(newReview);
+    console.log('Отзыв сохранен:', savedReview);
     
-    if (response.ok) {
-      const savedReview = await response.json();
-      console.log('Отзыв сохранен:', savedReview);
-      
-      // Перезагружаем отзывы из API
-      await loadReviews();
-      
-      // Закрываем модальное окно
-      closeAddReviewModal();
-      
-      // Показываем незаметное уведомление
-      showSuccessNotification('Отзыв успешно добавлен!');
-    } else {
-      throw new Error('Ошибка при сохранении отзыва');
-    }
+    // Перезагружаем отзывы из API
+    await loadReviews();
+    
+    // Закрываем модальное окно
+    closeAddReviewModal();
+    
+    // Показываем незаметное уведомление
+    showSuccessNotification('Отзыв успешно добавлен!');
   } catch (error) {
     console.error('Ошибка:', error);
-    showErrorNotification('Произошла ошибка при добавлении отзыва. Попробуйте еще раз.');
+    showErrorNotification('Произошла ошибка при добавлении отзыва: ' + (error.message || 'Попробуйте еще раз.'));
   }
 }
 
@@ -301,14 +314,20 @@ window.addEventListener('click', function(event) {
   }
 });
 
-// Загружаем отзывы при загрузке страницы
-loadReviews();
-
 // Убеждаемся, что модальное окно скрыто при загрузке
 document.addEventListener('DOMContentLoaded', function() {
   const modal = document.getElementById('addReviewModal');
   if (modal) {
     modal.style.display = 'none';
+  }
+  
+  // Инициализируем API и загружаем отзывы
+  if (window.travelioAPI) {
+    window.travelioAPI.initializeNavigation();
+    loadReviews();
+  } else {
+    console.error('TravelioAPI не загружен');
+    loadDefaultReviews();
   }
 });
 </script>
