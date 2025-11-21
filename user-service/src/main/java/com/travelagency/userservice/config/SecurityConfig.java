@@ -56,11 +56,16 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
+        // Разрешаем все источники (для разработки и продакшена)
         configuration.setAllowedOriginPatterns(Arrays.asList("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setAllowCredentials(true);
+        // Убираем allowCredentials, так как с "*" origin это несовместимо
+        // Если нужны credentials, используйте конкретные origin'ы вместо "*"
+        configuration.setAllowCredentials(false);
         configuration.setMaxAge(3600L);
+        // Явно указываем exposed headers для правильной работы с авторизацией
+        configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
@@ -76,7 +81,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/users/register", "/api/users/login").permitAll()
                 .requestMatchers("/api/users/health", "/api/users/test", "/api/users/status").permitAll()
                 .requestMatchers("/actuator/**").permitAll()
-                .requestMatchers("OPTIONS", "/**").permitAll()  // Разрешаем все OPTIONS запросы для CORS
+                .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()  // Разрешаем все OPTIONS запросы для CORS preflight
                 .anyRequest().authenticated()
             )
             .authenticationProvider(authenticationProvider())

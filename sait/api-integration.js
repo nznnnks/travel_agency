@@ -3,13 +3,34 @@
 
 class TravelioAPI {
     constructor() {
-        // Базовые URL микросервисов
-        this.baseURLs = {
-            userService: 'https://responsible-education-production.up.railway.app/api/users',
-            tripService: 'https://terrific-purpose-production.up.railway.app/api/trips',
-            reviewService: 'https://gentle-benevolence-production.up.railway.app/api/reviews',
-            matchService: 'https://positive-nature-production.up.railway.app/api/matches'
-        };
+        // Определяем базовый URL в зависимости от окружения
+        // Если запрос идет с того же домена, используем относительные пути
+        // Иначе используем полные URL Railway
+        const isLocalhost = window.location.hostname === 'localhost' || 
+                           window.location.hostname === '127.0.0.1' ||
+                           window.location.hostname === '';
+        
+        // Используем относительные пути для прокси через server.js
+        // или полные URL для прямых запросов к Railway
+        const useProxy = isLocalhost || window.location.protocol === 'file:';
+        
+        if (useProxy) {
+            // Используем относительные пути - server.js будет проксировать
+            this.baseURLs = {
+                userService: '/api/users',
+                tripService: '/api/trips',
+                reviewService: '/api/reviews',
+                matchService: '/api/matches'
+            };
+        } else {
+            // Используем полные URL Railway
+            this.baseURLs = {
+                userService: 'https://responsible-education-production.up.railway.app/api/users',
+                tripService: 'https://terrific-purpose-production.up.railway.app/api/trips',
+                reviewService: 'https://gentle-benevolence-production.up.railway.app/api/reviews',
+                matchService: 'https://positive-nature-production.up.railway.app/api/matches'
+            };
+        }
         
         // Токен аутентификации
         this.authToken = localStorage.getItem('authToken');
